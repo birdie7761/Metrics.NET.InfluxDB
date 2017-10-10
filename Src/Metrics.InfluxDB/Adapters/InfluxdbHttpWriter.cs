@@ -33,15 +33,15 @@ namespace Metrics.InfluxDB.Adapters
 			: base(config, batchSize) {
 
 			if (String.IsNullOrEmpty(config.Hostname))
-				throw new ArgumentNullException(nameof(config.Hostname));
+				throw new ArgumentNullException("config.Hostname");
 			if (String.IsNullOrEmpty(config.Database))
-				throw new ArgumentNullException(nameof(config.Database));
+				throw new ArgumentNullException("config.Database");
 
 			this.influxDbUri = FormatInfluxUri(config);
 			if (influxDbUri == null)
-				throw new ArgumentNullException(nameof(influxDbUri));
+				throw new ArgumentNullException("influxDbUri");
 			if (influxDbUri.Scheme != Uri.UriSchemeHttp && influxDbUri.Scheme != Uri.UriSchemeHttps)
-				throw new ArgumentException($"The URI scheme must be either http or https. Scheme: {influxDbUri.Scheme}", nameof(influxDbUri));
+				throw new ArgumentException(string.Concat("The URI scheme must be either http or https. Scheme: ",influxDbUri.Scheme, "influxDbUri"));
 		}
 
 
@@ -67,9 +67,9 @@ namespace Metrics.InfluxDB.Adapters
 					return result;
 				}
 			} catch (WebException ex) {
-				String response = new StreamReader(ex.Response?.GetResponseStream() ?? Stream.Null).ReadToEnd();
+				String response = new StreamReader(ex.Response != null ?ex.Response.GetResponseStream() : Stream.Null).ReadToEnd();
 				String firstNLines = "\n" + String.Join("\n", Encoding.UTF8.GetString(bytes).Split('\n').Take(5)) + "\n";
-				MetricsErrorHandler.Handle(ex, $"Error while uploading {Batch.Count} measurements ({formatSize(bytes.Length)}) to InfluxDB over HTTP [{influxDbUri}] [ResponseStatus: {ex.Status}] [Response: {response}] - First 5 lines: {firstNLines}");
+				MetricsErrorHandler.Handle(ex, string.Concat("Error while uploading ",Batch.Count.ToString()," measurements (",formatSize(bytes.Length),") to InfluxDB over HTTP [",influxDbUri,"] [ResponseStatus: ",ex.Status,"] [Response: ",response,"] - First 5 lines: ",firstNLines));
 				return Encoding.UTF8.GetBytes(response);
 			}
 		}

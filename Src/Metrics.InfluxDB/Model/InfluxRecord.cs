@@ -17,13 +17,13 @@ namespace Metrics.InfluxDB.Model
 		/// <summary>
 		/// A list of tag key/value pairs associated with this record. This value is optional.
 		/// </summary>
-		public List<InfluxTag> Tags { get; }
+        public List<InfluxTag> Tags { get; private set; }
 
 		/// <summary>
 		/// A list of field key/value pairs associated with this record.
 		/// This field is required, at least one field must be specified.
 		/// </summary>
-		public List<InfluxField> Fields { get; }
+        public List<InfluxField> Fields { get; private set; }
 
 		/// <summary>
 		/// The record timestamp. This value is optional. If this is null the timestamp is not included
@@ -52,8 +52,8 @@ namespace Metrics.InfluxDB.Model
 		public InfluxRecord(String name, IEnumerable<InfluxTag> tags, IEnumerable<InfluxField> fields, DateTime? timestamp = null) {
 			Name = name ?? String.Empty;
 			Timestamp = timestamp;
-			Tags = tags?.ToList() ?? new List<InfluxTag>();
-			Fields = fields?.ToList() ?? new List<InfluxField>();
+			Tags = tags != null ? tags.ToList() : new List<InfluxTag>();
+			Fields = fields != null ? fields.ToList() : new List<InfluxField>();
 		}
 
 

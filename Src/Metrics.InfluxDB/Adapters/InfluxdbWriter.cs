@@ -13,7 +13,7 @@ namespace Metrics.InfluxDB.Adapters
 	public abstract class InfluxdbWriter : IDisposable {
 		
 		/// <summary>This function formats bytes into a string with units either in bytes or KiB.</summary>
-		protected static readonly Func<Int64, String> formatSize = bytes => bytes < (1 << 12) ? $"{bytes:n0} bytes" : $"{bytes / 1024.0:n2} KiB";
+		protected static readonly Func<Int64, String> formatSize = bytes => bytes < (1 << 12) ? string.Concat(bytes.ToString("n0")," bytes ") :string.Concat((bytes / 1024.0).ToString("n2")," KiB");
 
 
 		private readonly InfluxBatch batch;
@@ -36,7 +36,7 @@ namespace Metrics.InfluxDB.Adapters
 			get { return batchSize; }
 			set {
 				if (value < 0)
-					throw new ArgumentOutOfRangeException(nameof(value), "Batch size cannot be negative.");
+					throw new ArgumentOutOfRangeException("value", "Batch size cannot be negative.");
 				batchSize = value;
 			}
 		}
@@ -57,7 +57,7 @@ namespace Metrics.InfluxDB.Adapters
 		/// <param name="batchSize">The maximum number of records to write per flush. Set to zero to write all records in a single flush. Negative numbers are not allowed.</param>
 		public InfluxdbWriter(Int32 batchSize) {
 			if (batchSize < 0)
-				throw new ArgumentOutOfRangeException(nameof(batchSize), "Batch size cannot be negative.");
+				throw new ArgumentOutOfRangeException("batchSize", "Batch size cannot be negative.");
 
 			this.batch = new InfluxBatch();
 			this.batchSize = batchSize;
@@ -97,7 +97,7 @@ namespace Metrics.InfluxDB.Adapters
 				WriteToTransport(bytes);
 			} catch (Exception ex) {
 				String firstNLines = "\n" + String.Join("\n", Encoding.UTF8.GetString(bytes).Split('\n').Take(5)) + "\n";
-				MetricsErrorHandler.Handle(ex, $"Error while flushing {Batch.Count} measurements to InfluxDB. Bytes: {formatSize(bytes.Length)} - First 5 lines: {firstNLines}");
+				MetricsErrorHandler.Handle(ex, string.Concat("Error while flushing ",Batch.Count.ToString()," measurements to InfluxDB. Bytes: ",formatSize(bytes.Length)," - First 5 lines: ",firstNLines));
 			} finally {
 				// clear always, regardless if it was successful or not
 				Batch.Clear();
@@ -111,7 +111,7 @@ namespace Metrics.InfluxDB.Adapters
 		/// </summary>
 		/// <param name="record">The record to write.</param>
 		public virtual void Write(InfluxRecord record) {
-			if (record == null) throw new ArgumentNullException(nameof(record));
+			if (record == null) throw new ArgumentNullException("record");
 			batch.Add(record);
 			if (batchSize > 0 && batch.Count >= batchSize)
 				Flush(); // flush if batch is full
@@ -122,7 +122,7 @@ namespace Metrics.InfluxDB.Adapters
 		/// </summary>
 		/// <param name="records">The records to write.</param>
 		public virtual void Write(IEnumerable<InfluxRecord> records) {
-			if (records == null) throw new ArgumentNullException(nameof(records));
+			if (records == null) throw new ArgumentNullException("records");
 			foreach (var r in records)
 				Write(r);
 		}
@@ -161,7 +161,7 @@ namespace Metrics.InfluxDB.Adapters
 			: base(batchSize) {
 			this.config = config;
 			if (config == null)
-				throw new ArgumentNullException(nameof(config));
+				throw new ArgumentNullException("config");
 		}
 
 		/// <summary>

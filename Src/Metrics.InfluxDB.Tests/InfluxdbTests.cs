@@ -174,7 +174,7 @@ namespace Metrics.InfluxDB.Tests
 
 		[Fact]
 		public void InfluxReport_CanAddRecords_ForCounter() {
-			var config = new InfluxConfig("localhost", "testdb");
+			var config = new InfluxConfig(){Hostname = "172.22.0.17",Port = 8086,Database = "metrics",Username = "admin",Password = "admin" }; 
 			var writer = new InfluxdbTestWriter(config); config.Writer = writer;
 			var report = new InfluxdbHttpReport(config);
 			var context = new DefaultMetricsContext("TestContext");
@@ -263,7 +263,7 @@ namespace Metrics.InfluxDB.Tests
 
 		[Fact]
 		public void InfluxReport_CanAddRecords_ForTimer() {
-			var config = new InfluxConfig("localhost", "testdb");
+			var config = new InfluxConfig(){Hostname = "172.22.0.17",Port = 8086,Database = "metrics",Username = "admin",Password = "admin" }; 
 			var writer = new InfluxdbTestWriter(config); config.Writer = writer;
 			var report = new InfluxdbHttpReport(config);
 			var context = new DefaultMetricsContext("TestContext");
@@ -292,7 +292,7 @@ namespace Metrics.InfluxDB.Tests
 
 		[Fact]
 		public void InfluxReport_CanAddRecords_ForHealthCheck() {
-			var config = new InfluxConfig("localhost", "testdb");
+			var config = new InfluxConfig(){Hostname = "172.22.0.17",Port = 8086,Database = "metrics",Username = "admin",Password = "admin" }; 
 			var writer = new InfluxdbTestWriter(config); config.Writer = writer;
 			var report = new InfluxdbHttpReport(config);
 			var context = new DefaultMetricsContext("TestContext");

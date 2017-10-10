@@ -93,11 +93,11 @@ namespace Metrics.InfluxDB
 		/// <param name="config">The configuration to validate.</param>
 		protected virtual void ValidateConfig(InfluxConfig config) {
 			if (config.Converter == null)
-				throw new ArgumentNullException(nameof(config.Converter), $"InfluxDB configuration invalid: {nameof(config.Converter)} cannot be null");
+				throw new ArgumentNullException("config.Converter", string.Concat("InfluxDB configuration invalid: {nameof(config.Converter)} cannot be null"));
 			if (config.Formatter == null)
-				throw new ArgumentNullException(nameof(config.Formatter), $"InfluxDB configuration invalid: {nameof(config.Formatter)} cannot be null");
+				throw new ArgumentNullException("config.Formatter", string.Concat("InfluxDB configuration invalid: {nameof(config.Formatter)} cannot be null"));
 			if (config.Writer == null)
-				throw new ArgumentNullException(nameof(config.Writer),    $"InfluxDB configuration invalid: {nameof(config.Writer)} cannot be null");
+				throw new ArgumentNullException("config.Writer",    string.Concat("InfluxDB configuration invalid: {nameof(config.Writer)} cannot be null"));
 
 			//log.Debug($"Initialized InfluxDB reporter. Writer: {config.Writer.GetType().Name} Host: {config.Hostname}:{config.Port} Database: {config.Database}");
 		}
@@ -125,44 +125,44 @@ namespace Metrics.InfluxDB
 
 		///<inheritdoc/>
 		protected override String FormatContextName(IEnumerable<String> contextStack, String contextName) {
-			return formatter?.FormatContextName(contextStack, contextName) ?? base.FormatContextName(contextStack, contextName);
+			return formatter != null ? FormatContextName(contextStack, contextName) : base.FormatContextName(contextStack, contextName);
 		}
 
 		///<inheritdoc/>
 		protected override String FormatMetricName<T>(String context, MetricValueSource<T> metric) {
-			return formatter?.FormatMetricName(context, metric.Name, metric.Unit, metric.Tags) ?? base.FormatMetricName(context, metric);
+            return formatter != null ? formatter.FormatMetricName(context, metric.Name, metric.Unit, metric.Tags) : base.FormatMetricName(context, metric);
 		}
 
 
 
 		///<inheritdoc/>
 		protected override void ReportGauge(String name, Double value, Unit unit, MetricTags tags) {
-			writer.Write(converter.GetRecords(name, tags, unit, value).Select(r => formatter?.FormatRecord(r) ?? r));
+            writer.Write(converter.GetRecords(name, tags, unit, value).Select(r => formatter != null ? formatter.FormatRecord(r) : r));
 		}
 
 		///<inheritdoc/>
 		protected override void ReportCounter(String name, CounterValue value, Unit unit, MetricTags tags) {
-			writer.Write(converter.GetRecords(name, tags, unit, value).Select(r => formatter?.FormatRecord(r) ?? r));
+            writer.Write(converter.GetRecords(name, tags, unit, value).Select(r => formatter != null ? formatter.FormatRecord(r) : r));
 		}
 
 		///<inheritdoc/>
 		protected override void ReportMeter(String name, MeterValue value, Unit unit, TimeUnit rateUnit, MetricTags tags) {
-			writer.Write(converter.GetRecords(name, tags, unit, value).Select(r => formatter?.FormatRecord(r) ?? r));
+            writer.Write(converter.GetRecords(name, tags, unit, value).Select(r => formatter != null ? formatter.FormatRecord(r) : r));
 		}
 
 		///<inheritdoc/>
 		protected override void ReportHistogram(String name, HistogramValue value, Unit unit, MetricTags tags) {
-			writer.Write(converter.GetRecords(name, tags, unit, value).Select(r => formatter?.FormatRecord(r) ?? r));
+            writer.Write(converter.GetRecords(name, tags, unit, value).Select(r => formatter != null ? formatter.FormatRecord(r) : r));
 		}
 
 		///<inheritdoc/>
 		protected override void ReportTimer(String name, TimerValue value, Unit unit, TimeUnit rateUnit, TimeUnit durationUnit, MetricTags tags) {
-			writer.Write(converter.GetRecords(name, tags, unit, value).Select(r => formatter?.FormatRecord(r) ?? r));
+            writer.Write(converter.GetRecords(name, tags, unit, value).Select(r => formatter != null ? formatter.FormatRecord(r) : r));
 		}
 
 		///<inheritdoc/>
 		protected override void ReportHealth(HealthStatus status) {
-			writer.Write(converter.GetRecords(status).Select(r => formatter?.FormatRecord(r) ?? r));
+            writer.Write(converter.GetRecords(status).Select(r => formatter != null ? formatter.FormatRecord(r) : r));
 		}
 
 	}

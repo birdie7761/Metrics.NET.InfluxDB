@@ -42,18 +42,18 @@ namespace Metrics.InfluxDB.Adapters
 			: base(batchSize) {
 			this.config = config;
 			if (config == null)
-				throw new ArgumentNullException(nameof(config));
+				throw new ArgumentNullException("config");
 			if (String.IsNullOrEmpty(config.Database))
-				throw new ArgumentNullException(nameof(config.Database));
+				throw new ArgumentNullException("config.Database");
 			if (config.Precision != InfluxPrecision.Seconds)
 				//log.Warn($"InfluxDB timestamp precision '{config.Precision}' is not supported by the JSON protocol, defaulting to {InfluxPrecision.Seconds}.");
-				throw new ArgumentException($"InfluxDB timestamp precision '{config.Precision}' is not supported by the JSON protocol, which only supports {InfluxPrecision.Seconds} precision.", nameof(config.Precision));
+				throw new ArgumentException(string.Concat("InfluxDB timestamp precision '",config.Precision,"' is not supported by the JSON protocol, which only supports ",InfluxPrecision.Seconds," precision. config.Precision"));
 
 			this.influxDbUri = FormatInfluxUri(config);
 			if (influxDbUri == null)
-				throw new ArgumentNullException(nameof(influxDbUri));
+				throw new ArgumentNullException("influxDbUri");
 			if (influxDbUri.Scheme != Uri.UriSchemeHttp && influxDbUri.Scheme != Uri.UriSchemeHttps)
-				throw new ArgumentException($"The URI scheme must be either http or https. Scheme: {influxDbUri.Scheme}", nameof(influxDbUri));
+				throw new ArgumentException(string.Concat("The URI scheme must be either http or https. Scheme: ",influxDbUri.Scheme,"influxDbUri"));
 		}
 
 
@@ -64,7 +64,7 @@ namespace Metrics.InfluxDB.Adapters
 		/// <returns>A new InfluxDB JSON URI using the configuration specified in the <paramref name="config"/> parameter.</returns>
 		protected Uri FormatInfluxUri(InfluxConfig config) {
 			InfluxPrecision prec = config.Precision ?? InfluxConfig.Default.Precision;
-			return new Uri($@"http://{config.Hostname}:{config.Port}/db/{config.Database}/series?u={config.Username}&p={config.Password}&time_precision={prec.ToShortName()}");
+			return new Uri(string.Concat("http://",config.Hostname,":",config.Port,"/db/",config.Database,"/series?u=",config.Username,"&p=",config.Password,"&time_precision=",prec.ToShortName()));
 		}
 
 
@@ -76,7 +76,7 @@ namespace Metrics.InfluxDB.Adapters
 		protected override Byte[] GetBatchBytes(InfluxBatch batch) {
 			var strBatch = ToJson(batch);
 			var bytes = Encoding.UTF8.GetBytes(strBatch);
-			System.Diagnostics.Debug.WriteLine($"[NEW JSON]:\n{strBatch}");
+			System.Diagnostics.Debug.WriteLine(string.Concat("[NEW JSON]:\n",strBatch));
 			return bytes;
 		}
 
@@ -92,9 +92,9 @@ namespace Metrics.InfluxDB.Adapters
 					return result;
 				}
 			} catch (WebException ex) {
-				String response = new StreamReader(ex.Response?.GetResponseStream() ?? Stream.Null).ReadToEnd();
+				String response = new StreamReader(ex.Response != null ? ex.Response.GetResponseStream() : Stream.Null).ReadToEnd();
 				String firstNLines = "\n" + String.Join("\n", Encoding.UTF8.GetString(bytes).Split('\n').Take(5)) + "\n";
-				MetricsErrorHandler.Handle(ex, $"Error while uploading {Batch.Count} measurements ({formatSize(bytes.Length)}) to InfluxDB over JSON HTTP [{influxDbUri}] [ResponseStatus: {ex.Status}] [Response: {response}] - First 5 lines: {firstNLines}");
+				MetricsErrorHandler.Handle(ex, string.Concat("Error while uploading ",Batch.Count.ToString()," measurements (",formatSize(bytes.Length),") to InfluxDB over JSON HTTP [",influxDbUri,"] [ResponseStatus: ",ex.Status,"] [Response: ",response,"] - First 5 lines: ",firstNLines));
 				return Encoding.UTF8.GetBytes(response);
 			}
 		}
@@ -108,11 +108,11 @@ namespace Metrics.InfluxDB.Adapters
 
 		private static JsonObject ToJsonObject(InfluxRecord record) {
 			if (record == null)
-				throw new ArgumentNullException(nameof(record));
+				throw new ArgumentNullException("record");
 			if (String.IsNullOrWhiteSpace(record.Name))
-				throw new ArgumentNullException(nameof(record.Name), "The measurement name must be specified.");
+				throw new ArgumentNullException("record.Name", "The measurement name must be specified.");
 			if (record.Fields.Count == 0)
-				throw new ArgumentNullException(nameof(record.Fields), $"Must specify at least one field. Metric name: {record.Name}");
+				throw new ArgumentNullException("record.Fields", string.Concat("Must specify at least one field. Metric name: ",record.Name));
 
 			var cols = record.Tags.Select(t => t.Key).Concat(record.Fields.Select(f => f.Key));
 			var data = record.Tags.Select(t => t.Value).Concat(record.Fields.Select(f => f.Value)).Select(v => FormatValue(v));
@@ -137,11 +137,11 @@ namespace Metrics.InfluxDB.Adapters
 		/// <param name="value">The field value to format.</param>
 		/// <returns>The field value formatted as a string used in the line protocol format.</returns>
 		private static JsonValue FormatValue(Object value) {
-			Type type = value?.GetType();
+			Type type = value != null ? value.GetType() : null;
 			if (value == null)
-				throw new ArgumentNullException(nameof(value));
+				throw new ArgumentNullException("value");
 			if (!InfluxUtils.IsValidValueType(type))
-				throw new ArgumentException(nameof(value), $"Value is not one of the supported types: {type} - Valid types: {String.Join(", ", InfluxUtils.ValidValueTypes.Select(t => t.Name))}");
+				throw new ArgumentException("value", string.Concat("Value is not one of the supported types: ",type," - Valid types: ",String.Join(", ", InfluxUtils.ValidValueTypes.Select(t => t.Name))));
 
 			if (InfluxUtils.IsIntegralType(type))
 				return FormatValue(Convert.ToInt64(value));

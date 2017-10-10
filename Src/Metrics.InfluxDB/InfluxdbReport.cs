@@ -55,7 +55,7 @@ namespace Metrics.InfluxDB
 				});
 			}
 
-			public JsonObject Json { get; }
+            public JsonObject Json { get; private set; }
 		}
 
 		private void Pack(string name, IEnumerable<string> columns, JsonValue value)

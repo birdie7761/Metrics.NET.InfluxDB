@@ -85,7 +85,7 @@ namespace Metrics.InfluxDB.Adapters
 		/// <param name="value">The metric value object.</param>
 		/// <returns>A list of <see cref="InfluxRecord"/> instances for the specified metric value.</returns>
 		public IEnumerable<InfluxRecord> GetRecords(String name, MetricTags tags, Unit unit, MeterValue value) {
-			if (value == null) throw new ArgumentNullException(nameof(value));
+			if (value == null) throw new ArgumentNullException("value");
 
 			yield return GetRecord(name, tags, new[] {
 				new InfluxField("Count",       value.Count),
@@ -116,7 +116,7 @@ namespace Metrics.InfluxDB.Adapters
 		/// <param name="value">The metric value object.</param>
 		/// <returns>A list of <see cref="InfluxRecord"/> instances for the specified metric value.</returns>
 		public IEnumerable<InfluxRecord> GetRecords(String name, MetricTags tags, Unit unit, HistogramValue value) {
-			if (value == null) throw new ArgumentNullException(nameof(value));
+			if (value == null) throw new ArgumentNullException("value");
 
 			yield return GetRecord(name, tags, new[] {
 				new InfluxField("Count",            value.Count),
@@ -149,7 +149,7 @@ namespace Metrics.InfluxDB.Adapters
 		/// <param name="value">The metric value object.</param>
 		/// <returns>A list of <see cref="InfluxRecord"/> instances for the specified metric value.</returns>
 		public IEnumerable<InfluxRecord> GetRecords(String name, MetricTags tags, Unit unit, TimerValue value) {
-			if (value == null) throw new ArgumentNullException(nameof(value));
+			if (value == null) throw new ArgumentNullException("value");
 
 			yield return GetRecord(name, tags, new[] {
 				new InfluxField("Active Sessions",  value.ActiveSessions),
@@ -202,7 +202,7 @@ namespace Metrics.InfluxDB.Adapters
 				//var name = InfluxUtils.LowerAndReplaceSpaces(result.Name);
 				//var nameWithTags = Regex.IsMatch(result.Name, "^[Nn]ame=") ? result.Name : $"Name={result.Name}";
 				var split = Regex.Split(result.Name, @"(?<!\\)[,]").Select(t => t.Trim()).Where(t => t.Length > 0).ToArray();
-				if (!Regex.IsMatch(split[0], "^[Nn]ame=")) split[0] = $"Name={InfluxUtils.LowerAndReplaceSpaces(split[0])}";
+				if (!Regex.IsMatch(split[0], "^[Nn]ame=")) split[0] = string.Concat("Name=",InfluxUtils.LowerAndReplaceSpaces(split[0]));
 				var name = String.Join(",", split);
 				yield return GetRecord("Health Checks", name, new[] {
 					new InfluxField("IsHealthy", result.Check.IsHealthy),

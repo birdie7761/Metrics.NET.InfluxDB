@@ -20,12 +20,12 @@ namespace Metrics.InfluxDB.Model
 			/// <summary>
 			/// The default port when using the HTTP protocol to connect to the InfluxDB server. This value is: 8086
 			/// </summary>
-			public static UInt16 PortHttp { get; }
+            public static UInt16 PortHttp { get; private set; }
 
 			/// <summary>
 			/// The default <see cref="InfluxPrecision"/> specifier value. This value is: <see cref="InfluxPrecision.Seconds"/>
 			/// </summary>
-			public static InfluxPrecision Precision { get; }
+            public static InfluxPrecision Precision { get; private set; }
 
 			static Default() {
 				PortHttp = 8086;
@@ -185,7 +185,7 @@ namespace Metrics.InfluxDB.Model
 		/// <param name="influxDbUri">The URI of the InfluxDB server, including any query string parameters.</param>
 		public InfluxConfig(Uri influxDbUri) {
 			if (influxDbUri == null)
-				throw new ArgumentNullException(nameof(influxDbUri));
+				throw new ArgumentNullException("influxDbUri");
 			Hostname = influxDbUri.Host;
 			Port = (UInt16)influxDbUri.Port;
 			var queryKvps = influxDbUri.ParseQueryString();

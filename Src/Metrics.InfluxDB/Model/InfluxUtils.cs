@@ -26,7 +26,7 @@ namespace Metrics.InfluxDB.Model
 		/// <param name="replaceChars">The character(s) to replace all space characters with (underscore by default). If <see cref="String.Empty"/>, removes all spaces. If null, spaces are not replaced.</param>
 		/// <returns>A copy of the string converted to lowercase with all spaces replaced with the specified character.</returns>
 		public static String LowerAndReplaceSpaces(String value, Boolean lowercase = true, String replaceChars = "_") {
-			if (value == null) throw new ArgumentNullException(nameof(value));
+			if (value == null) throw new ArgumentNullException("value");
 			if (lowercase) value = value.ToLowerInvariant();
 			if (replaceChars != null) value = Regex.Replace(value, RegexUnescSpace, replaceChars); // doesn't replace spaces preceded by a '\' (ie. escaped spaces like\ this)
 			return value;
@@ -45,7 +45,7 @@ namespace Metrics.InfluxDB.Model
 				case InfluxPrecision.Seconds:      return "s";
 				case InfluxPrecision.Minutes:      return "m";
 				case InfluxPrecision.Hours:        return "h";
-				default: throw new ArgumentException(nameof(precision), $"Invalid timestamp precision: {precision}");
+				default: throw new ArgumentException("precision", string.Concat("Invalid timestamp precision: ",precision));
 			}
 		}
 
@@ -62,7 +62,7 @@ namespace Metrics.InfluxDB.Model
 				case "s":  return InfluxPrecision.Seconds;
 				case "m":  return InfluxPrecision.Minutes;
 				case "h":  return InfluxPrecision.Hours;
-				default: throw new ArgumentException(nameof(precision), $"Invalid precision specifier: {precision}");
+				default: throw new ArgumentException("precision", string.Concat("Invalid precision specifier: ",precision));
 			}
 		}
 
@@ -126,7 +126,7 @@ namespace Metrics.InfluxDB.Model
 			// if there's only one item and it's not a key/value pair, alter it to use "Name" as the key and itself as the value
 			String name = itemName ?? String.Empty;
 			String[] split = Regex.Split(name, RegexUnescComma).Select(t => t.Trim()).Where(t => t.Length > 0).ToArray();
-			if (split.Length == 1 && !Regex.IsMatch(split[0], RegexUnescEqual)) split[0] = $"Name={split[0]}";
+			if (split.Length == 1 && !Regex.IsMatch(split[0], RegexUnescEqual)) split[0] = string.Concat("Name=",split[0]);
 			var retTags = ToInfluxTags(tags).Concat(ToInfluxTags(split));
 			return retTags.GroupBy(t => t.Key).Select(g => g.Last()); // this is similar to: retTags.DistinctBy(t => t.Key), but takes the last value instead so global tags get overriden by later tags
 		}
@@ -268,11 +268,11 @@ namespace Metrics.InfluxDB.Model
 			scheme = scheme ?? InfluxUtils.SchemeHttp;
 			if ((port ?? 0) == 0 && (scheme == SchemeHttp || scheme == SchemeHttps)) port = InfluxConfig.Default.PortHttp;
 			InfluxPrecision prec = precision ?? InfluxConfig.Default.Precision;
-			String uriString = $@"{scheme}://{host}:{port}/write?db={database}";
-			if (!String.IsNullOrWhiteSpace(username)) uriString += $@"&u={username}";
-			if (!String.IsNullOrWhiteSpace(password)) uriString += $@"&p={password}";
-			if (!String.IsNullOrWhiteSpace(retentionPolicy)) uriString += $@"&rp={retentionPolicy}";
-			if (prec != InfluxPrecision.Nanoseconds)  uriString += $@"&precision={prec.ToShortName()}"; // only need to specify precision if it's not nanoseconds (the InfluxDB default)
+			String uriString = string.Concat(scheme,"://",host,":",port,"/write?db=",database);
+			if (!String.IsNullOrWhiteSpace(username)) uriString += string.Concat("&u=",username);
+			if (!String.IsNullOrWhiteSpace(password)) uriString += string.Concat("&p=",password);
+			if (!String.IsNullOrWhiteSpace(retentionPolicy)) uriString += string.Concat("&rp=",retentionPolicy);
+			if (prec != InfluxPrecision.Nanoseconds)  uriString += string.Concat("&precision=",prec.ToShortName()); // only need to specify precision if it's not nanoseconds (the InfluxDB default)
 			return new Uri(uriString);
 			//return new Uri($@"{scheme}://{host}:{port}/write?db={database}&u={username}&p={password}&rp={retentionPolicy}&precision={prec.ToShortName()}");
 		}
@@ -285,7 +285,7 @@ namespace Metrics.InfluxDB.Model
 		/// </summary>
 		/// <param name="uri">The URI to parse</param>
 		/// <returns>A key/value collection that contains the query parameters.</returns>
-		public static IReadOnlyDictionary<String, String> ParseQueryString(this Uri uri) {
+		public static Dictionary<String, String> ParseQueryString(this Uri uri) {
 			var match = _regex.Match(uri.PathAndQuery);
 			var paramaters = new Dictionary<String, String>();
 			while (match.Success) {

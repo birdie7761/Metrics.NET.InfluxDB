@@ -10,12 +10,12 @@ namespace Metrics.InfluxDB.Model
 		/// <summary>
 		/// The field key.
 		/// </summary>
-		public String Key { get; }
+        public String Key { get; set; }
 
 		/// <summary>
 		/// The field value.
 		/// </summary>
-		public Object Value { get; }
+        public Object Value { get; set; }
 
 		/// <summary>
 		/// Returns true if this instance is equal to the Empty instance.
@@ -33,14 +33,14 @@ namespace Metrics.InfluxDB.Model
 		/// </summary>
 		/// <param name="key">The field key name.</param>
 		/// <param name="value">The field value.</param>
-		public InfluxField(String key, Object value) {
+		public InfluxField(String key, Object value) : this() {            
 			if (String.IsNullOrWhiteSpace(key))
-				throw new ArgumentNullException(nameof(key));
+				throw new ArgumentNullException("key");
 			if (value == null || (value is String && String.IsNullOrWhiteSpace((String)value)))
-				throw new ArgumentNullException(nameof(value));
+				throw new ArgumentNullException("value");
 
-			this.Key = key;
-			this.Value = value;
+			Key = key;
+			Value = value;
 		}
 
 		/// <summary>

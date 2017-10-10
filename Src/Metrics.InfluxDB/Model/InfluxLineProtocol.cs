@@ -19,10 +19,10 @@ namespace Metrics.InfluxDB.Model
 		/// <param name="tag">The <see cref="InfluxTag"/> to generate the line protocol string for.</param>
 		/// <returns>A string representing the tag in the line protocol format.</returns>
 		public static String ToLineProtocol(this InfluxTag tag) {
-			if (tag.IsEmpty) throw new ArgumentNullException(nameof(tag));
+			if (tag.IsEmpty) throw new ArgumentNullException("tag");
 			String key = EscapeValue(tag.Key);
 			String val = EscapeValue(tag.Value);
-			return $"{key}={val}";
+            return string.Concat(key, "=", val);
 		}
 
 		/// <summary>
@@ -31,10 +31,10 @@ namespace Metrics.InfluxDB.Model
 		/// <param name="field">The <see cref="InfluxField"/> to generate the line protocol string for.</param>
 		/// <returns>A string representing the field in the line protocol format.</returns>
 		public static String ToLineProtocol(this InfluxField field) {
-			if (field.IsEmpty) throw new ArgumentNullException(nameof(field));
+			if (field.IsEmpty) throw new ArgumentNullException("field");
 			String key = EscapeValue(field.Key);
 			String val = FormatValue(field.Value);
-			return $"{key}={val}";
+			return string.Concat(key,"=",val);
 		}
 
 		/// <summary>
@@ -51,11 +51,11 @@ namespace Metrics.InfluxDB.Model
 		/// </remarks>
 		public static String ToLineProtocol(this InfluxRecord record, InfluxPrecision? precision = null) {
 			if (record == null)
-				throw new ArgumentNullException(nameof(record));
+				throw new ArgumentNullException("record");
 			if (String.IsNullOrWhiteSpace(record.Name))
-				throw new ArgumentNullException(nameof(record.Name), "The measurement name must be specified.");
+				throw new ArgumentNullException("record.Name", "The measurement name must be specified.");
 			if (record.Fields.Count == 0)
-				throw new ArgumentNullException(nameof(record.Fields), $"Must specify at least one field. Metric name: {record.Name}");
+				throw new ArgumentNullException("record.Fields", string.Concat("Must specify at least one field. Metric name: ",record.Name));
 
 			StringBuilder sb = new StringBuilder();
 			sb.Append(EscapeValue(record.Name));
@@ -74,7 +74,7 @@ namespace Metrics.InfluxDB.Model
 		/// <param name="precision">The timestamp precision to use in the LineProtocol syntax. If null, the default precision <see cref="InfluxConfig.Default.Precision"/> is used.</param>
 		/// <returns>A string representing all records in the batch formatted in the line protocol format.</returns>
 		public static String ToLineProtocol(this InfluxBatch batch, InfluxPrecision? precision = null) {
-			if (batch == null) throw new ArgumentNullException(nameof(batch));
+			if (batch == null) throw new ArgumentNullException("batch");
 			return String.Join("\n", batch.Select(r => r.ToLineProtocol(precision)));
 		}
 
@@ -89,11 +89,11 @@ namespace Metrics.InfluxDB.Model
 		/// <param name="value">The field value to format.</param>
 		/// <returns>The field value formatted as a string used in the line protocol format.</returns>
 		public static String FormatValue(Object value) {
-			Type type = value?.GetType();
+			Type type = value != null ? value.GetType() : null;
 			if (value == null)
-				throw new ArgumentNullException(nameof(value));
+				throw new ArgumentNullException("value");
 			if (!InfluxUtils.IsValidValueType(type))
-				throw new ArgumentException(nameof(value), $"Value is not one of the supported types: {type} - Valid types: {String.Join(", ", InfluxUtils.ValidValueTypes.Select(t => t.Name))}");
+				throw new ArgumentException("value", string.Concat("Value is not one of the supported types: ",type," - Valid types: ",String.Join(", ", InfluxUtils.ValidValueTypes.Select(t => t.Name))));
 
 			if (InfluxUtils.IsIntegralType(type))
 				return FormatValue(Convert.ToInt64(value));
@@ -143,7 +143,7 @@ namespace Metrics.InfluxDB.Model
 		/// <param name="value">The string field value to format.</param>
 		/// <returns>The specified string field value properly escaped and enclosed in quotes.</returns>
 		public static String FormatValue(String value) {
-			if (String.IsNullOrWhiteSpace(value)) throw new ArgumentNullException(nameof(value));
+			if (String.IsNullOrWhiteSpace(value)) throw new ArgumentNullException("value");
 			String escapeQuote = value.Replace("\"", @"\""");
 			return String.Format("\"{0}\"", escapeQuote);
 		}
@@ -154,7 +154,7 @@ namespace Metrics.InfluxDB.Model
 		/// <param name="value">The value to escape.</param>
 		/// <returns>The escaped value.</returns>
 		public static String EscapeValue(String value) {
-			if (String.IsNullOrWhiteSpace(value)) throw new ArgumentNullException(nameof(value));
+			if (String.IsNullOrWhiteSpace(value)) throw new ArgumentNullException("value");
 			return value.Replace(" ", @"\ ").Replace(",", @"\,").Replace("=", @"\=");
 		}
 
@@ -169,7 +169,7 @@ namespace Metrics.InfluxDB.Model
 		/// <returns>The timestamp formatted to a string with the specified precision.</returns>
 		public static String FormatTimestamp(DateTime timestamp, InfluxPrecision precision) {
 			if (timestamp < unixEpoch)
-				throw new ArgumentOutOfRangeException(nameof(timestamp), "The timestamp cannot be earlier than the UNIX epoch (1970/1/1).");
+				throw new ArgumentOutOfRangeException("timestamp", "The timestamp cannot be earlier than the UNIX epoch (1970/1/1).");
 			
 			Int64 longTime = 0L;
 			TimeSpan sinceEpoch = timestamp - unixEpoch;
@@ -180,7 +180,7 @@ namespace Metrics.InfluxDB.Model
 				case InfluxPrecision.Seconds:      longTime = sinceEpoch.Ticks / TimeSpan.TicksPerSecond; break;
 				case InfluxPrecision.Minutes:      longTime = sinceEpoch.Ticks / TimeSpan.TicksPerMinute; break;
 				case InfluxPrecision.Hours:        longTime = sinceEpoch.Ticks / TimeSpan.TicksPerHour; break;
-				default: throw new ArgumentException(nameof(precision), $"Invalid timestamp precision: {precision}");
+				default: throw new ArgumentException("precision", string.Concat("Invalid timestamp precision: ",precision));
 			}
 
 			return String.Format(CultureInfo.InvariantCulture, "{0:d}", longTime);

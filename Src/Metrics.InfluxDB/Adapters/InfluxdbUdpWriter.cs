@@ -29,11 +29,11 @@ namespace Metrics.InfluxDB.Adapters
 			: base(config, batchSize) {
 
 			if (String.IsNullOrEmpty(config.Hostname))
-				throw new ArgumentNullException(nameof(config.Hostname));
+				throw new ArgumentNullException("config.Hostname");
 			if ((config.Port ?? 0) == 0)
-				throw new ArgumentNullException(nameof(config.Port), "Port is required for UDP connections.");
+				throw new ArgumentNullException("config.Port", "Port is required for UDP connections.");
 			if ((config.Precision ?? InfluxPrecision.Nanoseconds) != InfluxPrecision.Nanoseconds)
-				throw new ArgumentException($"Timestamp precision for UDP connections must be Nanoseconds. Actual: {config.Precision}", nameof(config.Precision));
+				throw new ArgumentException(string.Concat("Timestamp precision for UDP connections must be Nanoseconds. Actual: ",config.Precision), "config.Precision");
 		}
 
 
@@ -62,7 +62,7 @@ namespace Metrics.InfluxDB.Adapters
 				}
 			} catch (Exception ex) {
 				String firstNLines = "\n" + String.Join("\n", Encoding.UTF8.GetString(bytes).Split('\n').Take(5)) + "\n";
-				MetricsErrorHandler.Handle(ex, $"Error while uploading {Batch.Count} measurements ({formatSize(bytes.Length)}) to InfluxDB over UDP [net.udp://{config.Hostname}:{config.Port.Value}/] - Ensure that the message size is less than the UDP send buffer size (usually 8-64KB), and reduce the BatchSize on the InfluxdbWriter if necessary. - First 5 lines: {firstNLines}");
+				MetricsErrorHandler.Handle(ex, string.Concat("Error while uploading ",Batch.Count," measurements (",formatSize(bytes.Length),") to InfluxDB over UDP [net.udp://",config.Hostname,":",config.Port.Value,"/] - Ensure that the message size is less than the UDP send buffer size (usually 8-64KB), and reduce the BatchSize on the InfluxdbWriter if necessary. - First 5 lines: ",firstNLines));
 				return Encoding.UTF8.GetBytes(0.ToString());
 			}
 		}

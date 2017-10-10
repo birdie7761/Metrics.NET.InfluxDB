@@ -110,7 +110,10 @@ namespace Metrics.InfluxDB
         public static MetricsReports WithInfluxDbHttp(this MetricsReports reports, InfluxConfig config, TimeSpan interval, MetricsFilter filter = null, Action<InfluxConfig> configFunc = null)
         {
             InfluxConfig conf = config ?? new InfluxConfig();
-            configFunc?.Invoke(conf);
+            if(configFunc != null)
+            {
+                configFunc.Invoke(conf);
+            }
             return reports.WithReport(new InfluxdbHttpReport(conf), interval, filter);
         }
 
@@ -161,7 +164,10 @@ namespace Metrics.InfluxDB
         public static MetricsReports WithInfluxDbUdp(this MetricsReports reports, InfluxConfig config, TimeSpan interval, MetricsFilter filter = null, Action<InfluxConfig> configFunc = null)
         {
             InfluxConfig conf = config ?? new InfluxConfig();
-            configFunc?.Invoke(conf);
+            if(configFunc != null)
+            {
+                configFunc.Invoke(conf);
+            }            
             return reports.WithReport(new InfluxdbUdpReport(conf), interval, filter);
         }
 
@@ -205,7 +211,10 @@ namespace Metrics.InfluxDB
         public static MetricsReports WithInfluxDbJson(this MetricsReports reports, InfluxConfig config, TimeSpan interval, MetricsFilter filter = null, Action<InfluxConfig> configFunc = null)
         {
             InfluxConfig conf = config ?? new InfluxConfig();
-            configFunc?.Invoke(conf);
+            if(configFunc != null)
+            {
+                configFunc.Invoke(conf);
+            }
             return reports.WithReport(new InfluxdbJsonReport(conf), interval, filter);
         }
 
@@ -238,7 +247,10 @@ namespace Metrics.InfluxDB
         /// <returns>This <see cref="InfluxConfig"/> instance.</returns>
         public static InfluxConfig WithWriter(this InfluxConfig config, InfluxdbWriter writer, Action<InfluxdbWriter> configFunc = null)
         {
-            configFunc?.Invoke(writer);
+            if(configFunc != null)
+            {
+                configFunc.Invoke(writer);
+            }            
             config.Writer = writer;
             return config;
         }
@@ -264,7 +276,10 @@ namespace Metrics.InfluxDB
         /// <returns>This <see cref="InfluxConfig"/> instance.</returns>
         public static InfluxConfig WithConverter(this InfluxConfig config, InfluxdbConverter converter, Action<InfluxdbConverter> configFunc = null)
         {
-            configFunc?.Invoke(converter);
+            if(configFunc != null)
+            {
+                configFunc.Invoke(converter);
+            }             
             config.Converter = converter;
             return config;
         }
@@ -290,7 +305,10 @@ namespace Metrics.InfluxDB
         /// <returns>This <see cref="InfluxConfig"/> instance.</returns>
         public static InfluxConfig WithFormatter(this InfluxConfig config, InfluxdbFormatter formatter, Action<InfluxdbFormatter> configFunc = null)
         {
-            configFunc?.Invoke(formatter);
+            if(configFunc != null)
+            {
+                configFunc.Invoke(formatter);
+            } 
             config.Formatter = formatter;
             return config;
         }
@@ -424,7 +442,7 @@ namespace Metrics.InfluxDB
         [Obsolete(JsonObsoleteMsg)]
         public static MetricsReports WithInfluxDb(this MetricsReports reports, String host, UInt16 port, String user, String pass, String database, TimeSpan interval)
         {
-            return WithInfluxDb(reports, new Uri($@"http://{host}:{port}/db/{database}/series?u={user}&p={pass}&time_precision=s"), interval);
+            return WithInfluxDb(reports, new Uri(string.Concat("http://",host,":",port.ToString(),"/db/",database,"/series?u=",user,"&p=",pass,"&time_precision=s")), interval);
         }
 
         /// <summary>

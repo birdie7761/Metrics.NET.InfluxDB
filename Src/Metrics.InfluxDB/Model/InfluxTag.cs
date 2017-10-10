@@ -10,12 +10,12 @@ namespace Metrics.InfluxDB.Model
 		/// <summary>
 		/// The tag key.
 		/// </summary>
-		public String Key { get; }
+        public String Key { get; private set; }
 
 		/// <summary>
 		/// The tag value.
 		/// </summary>
-		public String Value { get; }
+        public String Value { get; private set; }
 
 		/// <summary>
 		/// Returns true if this instance is equal to the Empty instance.
@@ -34,11 +34,13 @@ namespace Metrics.InfluxDB.Model
 		/// </summary>
 		/// <param name="key">The tag key name.</param>
 		/// <param name="value">The tag value.</param>
-		public InfluxTag(String key, String value) {
+        public InfluxTag(String key, String value)
+            : this()
+        {
 			if (String.IsNullOrWhiteSpace(key))
-				throw new ArgumentNullException(nameof(key));
+				throw new ArgumentNullException("key");
 			if (String.IsNullOrWhiteSpace(value))
-				throw new ArgumentNullException(nameof(value));
+				throw new ArgumentNullException("value");
 
 			this.Key = key;
 			this.Value = value;
