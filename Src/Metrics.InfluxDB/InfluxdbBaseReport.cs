@@ -125,7 +125,7 @@ namespace Metrics.InfluxDB
 
 		///<inheritdoc/>
 		protected override String FormatContextName(IEnumerable<String> contextStack, String contextName) {
-			return formatter != null ? FormatContextName(contextStack, contextName) : base.FormatContextName(contextStack, contextName);
+            return formatter != null ? formatter.FormatContextName(contextStack, contextName) : base.FormatContextName(contextStack, contextName);
 		}
 
 		///<inheritdoc/>
